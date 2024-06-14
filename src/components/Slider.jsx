@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import MovieApi from '../services/movieapi'
 import { HiChevronLeft, HiChevronRight } from 'react-icons/hi2';
+
 const IMAGE_BASE_URL="https://image.tmdb.org/t/p/original";
 const screenWidth=window.innerWidth;
 function Slider() {
@@ -34,7 +35,7 @@ function Slider() {
 
    
     <div className='flex overflow-x-auto w-full px-16 py-4
-    scrollbar-none scroll-smooth' ref={elementRef}> 
+     scroll-smooth no-scrollbar' ref={elementRef}> 
         {movieList.map((item, index)=>(
             <img key={index} src={IMAGE_BASE_URL+item.backdrop_path} 
             className='min-w-full  md:h-[310px] object-cover
