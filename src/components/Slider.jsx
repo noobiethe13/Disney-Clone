@@ -9,24 +9,31 @@ function Slider() {
   const [movieList, setMovieList] = useState([]);
   const [error, setError] = useState(false);
   const elementRef = useRef();
+  const maxRetries = 5;
 
   useEffect(() => {
-    getTrendingMovies();
+    getTrendingMovies(0);
   }, []);
 
-  const getTrendingMovies = async () => {
+  const getTrendingMovies = async (retryCount) => {
     try {
       const resp = await MovieApi.getTrendingVideos();
       if (resp.status === 500) {
-        setError(true);
+        if (retryCount < maxRetries) {
+          setTimeout(() => getTrendingMovies(retryCount + 1), 2000); // retry after 2 seconds
+        } else {
+          setError(true);
+        }
       } else {
-        console.log(resp.data.results);
         setMovieList(resp.data.results);
         setError(false);
       }
     } catch (error) {
-      console.error('Error fetching trending videos:', error);
-      setError(true);
+      if (retryCount < maxRetries) {
+        setTimeout(() => getTrendingMovies(retryCount + 1), 2000); // retry after 2 seconds
+      } else {
+        setError(true);
+      }
     }
   };
 
@@ -43,15 +50,17 @@ function Slider() {
       {error ? (
         <div className="flex items-center justify-center h-full">
           <div className="bg-red-500 text-white p-4 rounded-md">
-          Error fetching trending movies. TMDB Server Error.
+            Error fetching trending movies. TMDB Server Error.
           </div>
         </div>
       ) : (
         <div>
-          <HiChevronLeft className="hidden md:block text-white text-[30px] absolute
+          <HiChevronLeft
+            className="hidden md:block text-white text-[30px] absolute
           mx-8 mt-[150px] cursor-pointer"
             onClick={() => sliderLeft(elementRef.current)} />
-          <HiChevronRight className='hidden md:block text-white text-[30px] absolute
+          <HiChevronRight
+            className='hidden md:block text-white text-[30px] absolute
           mx-8 mt-[150px] cursor-pointer right-0'
             onClick={() => sliderRight(elementRef.current)} />
 

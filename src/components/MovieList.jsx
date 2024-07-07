@@ -8,23 +8,31 @@ function MovieList({ genreId, index_ }) {
   const [movieList, setMovieList] = useState([]);
   const [error, setError] = useState(false);
   const elementRef = useRef(null);
+  const maxRetries = 5;
 
   useEffect(() => {
-    getMovieByGenreId();
+    getMovieByGenreId(0);
   }, []);
 
-  const getMovieByGenreId = async () => {
+  const getMovieByGenreId = async (retryCount) => {
     try {
       const resp = await GlobalApi.getMovieByGenreId(genreId);
       if (resp.status === 500) {
-        setError(true);
+        if (retryCount < maxRetries) {
+          setTimeout(() => getMovieByGenreId(retryCount + 1), 2000); // retry after 2 seconds
+        } else {
+          setError(true);
+        }
       } else {
         setMovieList(resp.data.results);
         setError(false);
       }
     } catch (error) {
-      console.error('Error fetching movies by genre:', error);
-      setError(true);
+      if (retryCount < maxRetries) {
+        setTimeout(() => getMovieByGenreId(retryCount + 1), 2000); // retry after 2 seconds
+      } else {
+        setError(true);
+      }
     }
   };
 
@@ -41,7 +49,7 @@ function MovieList({ genreId, index_ }) {
       {error ? (
         <div className="flex items-center justify-center h-full">
           <div className="bg-red-500 text-white p-4 rounded-md">
-            Error fetching data for this genre. TMDB Server Error.
+            Error fetching movies by genre. TMDB Server Error.
           </div>
         </div>
       ) : (
